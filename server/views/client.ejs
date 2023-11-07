@@ -7,5 +7,8 @@
   <body>
     <div id="root"><%- component %></div>
     <script defer="defer" src="<%= assets["client.js"] %>"></script>
+    <script>
+      window.__REACT_QUERY_STATE__ = <%= dehydratedState %>;
+    </script>
   </body>
 </html>

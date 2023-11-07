@@ -4,6 +4,9 @@ import path from 'path'
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 import { App } from '../client/components/app'
+import { QueryClient, hydrate, QueryClientProvider, dehydrate, HydrationBoundary } from '@tanstack/react-query'
+import axios from 'axios'
+import { Users } from '../client/components/users'
 
 const server = express()
 
@@ -23,9 +26,28 @@ server.get('/', (req, res) => {
   res.render('client', { assets, component })
 })
 
-server.get('/tanstack-query', (req, res) => {
-  const component = ReactDOMServer.renderToString(React.createElement(App))
-  res.render('client', { assets, component })
+server.get('/tanstack-query', async (req, res) => {
+  const queryClient = new QueryClient()
+  await queryClient.prefetchQuery({
+    queryKey: ['Teste'],
+    queryFn: () => {
+      return axios.get('https://api.github.com/users').then(res => res.data)
+    }
+  })
+  const dehydratedState = dehydrate(queryClient)
+
+  const component = ReactDOMServer.renderToString(
+    <QueryClientProvider client={queryClient}>
+      <HydrationBoundary state={dehydratedState}>
+        <Users />
+      </HydrationBoundary>
+    </QueryClientProvider>,
+  )
+
+  res.render('client', { assets, component, dehydratedState: JSON.stringify(dehydratedState) })
+
+  queryClient.clear()
+
 })
 
 server.listen(3000, () => {
