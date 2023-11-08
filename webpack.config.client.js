@@ -5,7 +5,7 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin')
 module.exports = {
   name: 'client',
   entry: {
-    client: path.resolve(__dirname, 'client/client.tsx'),
+    client: path.resolve(__dirname, 'src/client/client.tsx'),
   },
   mode: 'production',
   output: {
@@ -25,8 +25,20 @@ module.exports = {
         options: {
           configFile: 'tsconfig.client.json',
         },
+        exclude: /node_modules/,
       },
     ],
+  },
+  devServer: {
+    static: {
+      directory: path.join(__dirname, "dist"),
+    },
+    hot: true,
+    open: true,
+    historyApiFallback: true,
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   plugins: [new CleanWebpackPlugin(), new WebpackManifestPlugin()],
 }

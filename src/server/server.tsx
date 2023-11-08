@@ -7,6 +7,7 @@ import { App } from '../client/components/app'
 import { QueryClient, hydrate, QueryClientProvider, dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import axios from 'axios'
 import { Users } from '../client/components/users'
+import { UsersService } from '../services/users/users'
 
 const server = express()
 
@@ -23,16 +24,14 @@ const assets = JSON.parse(manifest)
  
 server.get('/', (req, res) => {
   const component = ReactDOMServer.renderToString(React.createElement(App))
-  res.render('client', { assets, component })
+  res.render('index', { assets, component })
 })
 
 server.get('/tanstack-query', async (req, res) => {
   const queryClient = new QueryClient()
   await queryClient.prefetchQuery({
-    queryKey: ['Teste'],
-    queryFn: () => {
-      return axios.get('https://api.github.com/users').then(res => res.data)
-    }
+    queryKey: ['users'],
+    queryFn: UsersService.get
   })
   const dehydratedState = dehydrate(queryClient)
 
